@@ -111,15 +111,15 @@ void main()
 	chessPosArray*** test = validKnightMoves();
 	printValids(test);
 
-	chessPos cPos; 
+	chessPos cPos;
 	cPos[0] = 'B';
 	cPos[1] = '3';
-	pathTree tr; 
-	
-	tr = findAllPossibleKnightPaths(&cPos);
-//	printf("1: %c 2: %c\n",tr.root->position[0],tr.root->position[1]);
+	pathTree tr;
 
-	// display();
+	tr = findAllPossibleKnightPaths(&cPos);
+	//	printf("1: %c 2: %c\n",tr.root->position[0],tr.root->position[1]);
+
+		// display();
 
 }
 
@@ -131,7 +131,7 @@ chessPosArray*** validKnightMoves()
 	chessPosArray*** res;
 	res = (chessPosArray***)malloc(sizeof(chessPosArray**) * SIZE);//Error
 	checkAllocation(res);
-	
+
 
 	for (i = 0; i < SIZE; i++)
 	{
@@ -147,7 +147,7 @@ chessPosArray*** validKnightMoves()
 			//realoc
 		}
 	}
-	
+
 	return res;
 }
 
@@ -285,9 +285,9 @@ treeNodeListCell* arrToTreeListRec(chessPosArray* arr)
 	int i;
 	treeNodeListCell* res;
 	res = (treeNodeListCell**)malloc(sizeof(treeNodeListCell*));
-//	res->node = (treeNode**)malloc(sizeof(treeNode*));
-//	res->next = (treeNodeListCell**)malloc(sizeof(treeNodeListCell*));
-//	checkAllocation(res->node);
+	//	res->node = (treeNode**)malloc(sizeof(treeNode*));
+	//	res->next = (treeNodeListCell**)malloc(sizeof(treeNodeListCell*));
+	//	checkAllocation(res->node);
 
 	if (arr->size == 0)
 		return NULL;
@@ -295,8 +295,8 @@ treeNodeListCell* arrToTreeListRec(chessPosArray* arr)
 	else {
 		res->node = (treeNode*)malloc(sizeof(treeNode));
 		//res->node->next = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
-		res->node->position[0] = arr->positions[arr->size-1][0];
-		res->node->position[1] = arr->positions[arr->size-1][1];
+		res->node->position[0] = arr->positions[arr->size - 1][0];
+		res->node->position[1] = arr->positions[arr->size - 1][1];
 		arr->size--;
 		res->next = arrToTreeListRec(arr);
 	}
@@ -306,23 +306,23 @@ treeNodeListCell* arrToTreeListRec(chessPosArray* arr)
 
 
 
-bool visitedAllChild(chessPos* startPos, treeNodeListCell* childList,bool path[][SIZE])
+bool visitedAllChild(chessPos* startPos, treeNodeListCell* childList, bool path[][SIZE])
 {
 	treeNodeListCell* current = childList;
 
-	int childPosRow, childPosCol; 
+	int childPosRow, childPosCol;
 	while (current != NULL)
 	{
 		childPosRow = current->node->position[0] - 'A'; /* cast to int */
 		childPosCol = current->node->position[1] - '1';
-		printf("check 2 : %d %d\n", childPosRow,childPosCol);
+		printf("check 2 : %d %d\n", childPosRow, childPosCol);
 		if (path[childPosRow][childPosCol] == false)
 			return false;
-		else 
+		else
 			current = current->next;
 	}
 	return true;
-	
+
 }
 pathTree findAllPossibleKnightPaths(chessPos* strartingPosition)
 {
@@ -341,20 +341,22 @@ treeNode* findAllPossibleKnightPathsHelper(chessPos* startPos, chessPosArray*** 
 {
 	int i, posRow, posCol;
 	treeNodeListCell* childList;
-	pathTree tr; 
+	pathTree tr;
 	tr.root = (treeNode*)malloc(sizeof(treeNode));
-	childList = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));//
-	childList->next= (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
+	childList = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
+	childList->next = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
+	
 
 	checkAllocation(tr.root);
 
-	posRow = *startPos[0] - 'A';
-	posCol = *startPos[1] - '1';
+	posRow = startPos[0][0] - 'A';
+	posCol = startPos[0][1] - '1';
 	printf("YUVALI %c %c", startPos[0][0], startPos[0][1]);
 	childList = arrToTreeListRec(mat[posRow][posCol]);
 
-	if (visitedAllChild(startPos, childList, path ))
-		 return NULL;
+
+	if (visitedAllChild(startPos, childList, path))
+		return NULL;
 	else
 	{
 		tr.root->position[0] = startPos[0];
@@ -366,11 +368,12 @@ treeNode* findAllPossibleKnightPathsHelper(chessPos* startPos, chessPosArray*** 
 
 		while (childList != NULL)
 		{
+			childList->node->next = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
 			childList->node->next = findAllPossibleKnightPathsHelper(childList, mat, path)->next;
 			childList = childList->next;
 		}
 		path[posRow][posCol] = false;
-		
+
 	}
 	return tr.root;
 }
