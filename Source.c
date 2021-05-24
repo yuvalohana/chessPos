@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define MAXSTEPS 8
-#define SIZE 8 
+#define MAXSTEPS 5
+#define SIZE 5 
 
 
 typedef char chessPos[2];
@@ -28,7 +28,7 @@ typedef struct chessPosList {
 
 typedef struct _treeNode {
 	chessPos position;
-	struct treeNodeListCell* next;
+	struct treeNodeListCell* next_possible_position;
 } treeNode;
 
 typedef struct _treeNodeListCell {
@@ -122,12 +122,17 @@ void main()
 	pathTree tr;
 
 	tr = findAllPossibleKnightPaths(&cPos);
-	while (tr.root != NULL)
-	{
-		printf("1: %c 2: %c\n", tr.root->position[0], tr.root->position[1]);
-		tr.root = tr.root->next;
-	}
+/*	treeNodeListCell* cell;
+	cell = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
+	cell = tr.root->next_possible_position;
 
+	printf("1: %c 2: %c\n", tr.root->position[0], tr.root->position[1]);
+	while (cell->node!=NULL)
+	{
+		printf("1: %c 2: %c\n", cell->node->position[0], cell->node->position[1]);
+
+		cell->node = cell->next;
+	}*/
 	// display();
 
 }
@@ -138,7 +143,7 @@ chessPosArray*** validKnightMoves()
 	int i, j, ChessPosSize;
 
 	chessPosArray*** res;
-	res = (chessPosArray***)malloc(sizeof(chessPosArray**) * SIZE);//Error
+	res = (chessPosArray***)malloc(sizeof(chessPosArray**) * SIZE);
 	checkAllocation(res);
 
 
@@ -336,24 +341,26 @@ treeNode* findAllPossibleKnightPathsHelper(chessPos startPos, chessPosArray*** m
 
 	if (visitedAllChild(path, mat[posRow][posCol]))
 		return NULL;
-	
+
 	root = (treeNode*)malloc(sizeof(treeNode));
 	checkAllocation(root);
-	root->next = NULL;
+	root->next_possible_position = NULL;
 
 	path[posRow][posCol] = true;
 	root->position[0] = startPos[0];
 	root->position[1] = startPos[1];
 
+
 	for (i = 0; i < mat[posRow][posCol]->size; i++)
 	{
 		if ((path[(mat[posRow][posCol]->positions[i][0]) - 'A'][(mat[posRow][posCol]->positions[i][1]) - '1']) == false)
 		{
-			child = findAllPossibleKnightPathsHelper(mat[posRow][posCol]->positions[i], mat, path);
 
-			root->next = insertToHeadList(root->next, child);
+			child = findAllPossibleKnightPathsHelper(mat[posRow][posCol]->positions[i], mat, path);
+			
+			root->next_possible_position = insertToHeadList(root->next_possible_position, child); //???
 		}
-		printf(" %c ", root->position[0]);
+
 	}
 	path[posRow][posCol] = false;
 	return root;
@@ -373,12 +380,24 @@ bool visitedAllChild(bool path[][SIZE], chessPosArray* childArr)
 
 treeNodeListCell* insertToHeadList(treeNodeListCell* childList, treeNode* child)
 {
-	treeNodeListCell* res;
-	res = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
-	res->node = child;
-	res->next = childList;
-	return res;
+	treeNodeListCell* temp;
+	temp = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
+	treeNodeListCell* newNode;
+	newNode = (treeNodeListCell*)malloc(sizeof(treeNodeListCell));
 
+	newNode->node = child;
+	newNode->next = NULL;
+
+	if (childList == NULL)
+		childList = newNode;
+
+	else {
+		temp = childList;
+		childList = newNode;
+		newNode->next = temp;
+	}
+
+	return childList;
 }
 
 //chessPosCell* createNewListNode(chessPosList* listNode)
